@@ -4,7 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# f(theta) = theta0 + theta1 * x
+# f(theta) = theta0 + theta1 * x + theta2 * x^2
 
 # 数据图像
 train = np.loadtxt('click.csv', delimiter=',', skiprows=1)
@@ -25,13 +25,19 @@ train_z = standardize(train_x)
 plt.plot(train_z, train_y, 'o')
 
 # 训练
-theta0 = np.random.rand()
-theta1 = np.random.rand()
+theta = np.random.rand(3)
+
+
+def to_matrix(x):
+    return np.vstack([np.ones(x.shape[0]), x, x ** 2]).T
+
+
+X = to_matrix(train_z)
 
 
 # 预测函数
 def f(x):
-    return theta0 + theta1 * x
+    return np.dot(x, theta)
 
 
 # 目标函数
@@ -46,19 +52,17 @@ diff = 1
 # 更新次数
 count = 1
 # 重复学习
-error = E(train_z, train_y)
+error = E(X, train_y)
 while diff > 0.01:
-    new_theta0 = theta0 - ETA * np.sum(f(train_z) - train_y)
-    new_theta1 = theta1 - ETA * np.sum((f(train_z) - train_y) * train_z)
-    theta0, theta1 = new_theta0, new_theta1
-    curr_error = E(train_z, train_y)
+    theta = theta - ETA * np.dot(f(X) - train_y, X)
+    curr_error = E(X, train_y)
     diff = error - curr_error
     error = curr_error
     count += 1
-    print(f'第{count}次， theta0:{theta0:.3f}, theta1:{theta1:.3f}, 差值:{diff:.4f}')
+    print(f'第{count}次， theta:{theta}, 差值:{diff:.4f}')
 
 x = np.linspace(-3, 3, 100)
-y = f(x)
+y = f(to_matrix(x))
 plt.plot(x, y)
 
 plt.show()
