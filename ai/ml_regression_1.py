@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# coding: utf-8
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,8 +10,8 @@ train_x = train[:, 0]
 train_y = train[:, 1]
 
 # 数据标准化/z-score规范化
-mu = train_x.mean()
-sigma = train_x.std()
+mu = np.mean(train_x)
+sigma = np.std(train_x)
 
 
 def standardize(x):
