@@ -58,11 +58,11 @@ while diff > 0.01:
     curr_error = E(X, train_y)
     diff = error - curr_error
     error = curr_error
-    count += 1
     print(f'第{count}次， theta:{theta}, 差值:{diff:.4f}')
+    count += 1
 
-x = np.linspace(-3, 3, 100)
-y = f(to_matrix(x))
-plt.plot(x, y)
+xs = np.linspace(-3, 3, 100)
+ys = f(to_matrix(xs))
+plt.plot(xs, ys)
 
 plt.show()
