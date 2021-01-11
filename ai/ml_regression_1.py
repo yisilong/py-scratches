@@ -14,13 +14,13 @@ class MLRegression(object):
 
     def __init__(self, file_name, eta=0.001, delimiter=',', skiprows=1):
         self.eta = eta
-        self._theta0 = np.random.rand()
-        self._theta1 = np.random.rand()
         train = np.loadtxt(file_name, delimiter=delimiter, skiprows=skiprows)
         self.train_x = train[:, 0]
         self.train_y = train[:, 1]
         self.mu = np.mean(self.train_x)
         self.sigma = np.std(self.train_x)
+        self._theta0 = np.min(self.train_y)
+        self._theta1 = 0
 
     def standardize(self, x):
         return (x - self.mu) / self.sigma
@@ -78,8 +78,6 @@ class MLRegression(object):
         xs = np.linspace(-3, 3, 100)
         ys = self.f(xs)
         line, = ax.plot(xs, ys)
-
-        step = self.step(train_z)
 
         def animate(i):
             ys = self.f(xs)

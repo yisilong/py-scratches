@@ -13,13 +13,14 @@ class MLRegression(object):
     """
 
     def __init__(self, file_name, eta=0.001, delimiter=',', skiprows=1):
-        self.eta = eta
-        self._theta = np.random.rand(3)
         train = np.loadtxt(file_name, delimiter=delimiter, skiprows=skiprows)
         self.train_x = train[:, 0]
         self.train_y = train[:, 1]
         self.mu = np.mean(self.train_x)
         self.sigma = np.std(self.train_x)
+        self.eta = eta
+        self._theta = np.zeros(3)
+        self._theta[0] = np.min(self.train_y) - 50
 
     def standardize(self, x):
         return (x - self.mu) / self.sigma
@@ -77,14 +78,15 @@ class MLRegression(object):
             yield object()
 
     def draw_animation(self):
-        fig, ax = plt.subplots()
+        fig, (plt1, plt2) = plt.subplots(1, 2, sharey='all', sharex='all', figsize=(12, 6))
 
         train_z = self.standardize(self.train_x)
-        ax.plot(train_z, self.train_y, 'o')
+        plt1.plot(train_z, self.train_y, 'o')
 
+        plt2.plot(train_z, self.train_y, 'o')
         xs = np.linspace(-3, 3, 100)
         ys = self.f(self.to_matrix(xs))
-        line, = ax.plot(xs, ys)
+        line, = plt2.plot(xs, ys)
 
         def animate(i):
             ys = self.f(self.to_matrix(xs))
@@ -99,9 +101,10 @@ class MLRegression(object):
                                       func=animate,
                                       frames=self.step(train_z),
                                       init_func=init,
-                                      interval=5,
+                                      interval=1,
                                       blit=False,
                                       repeat=False)
+
         plt.show()
 
 

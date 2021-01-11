@@ -14,12 +14,13 @@ class MLRegression(object):
 
     def __init__(self, file_name, eta=0.001, delimiter=',', skiprows=1):
         self.eta = eta
-        self._theta = np.random.rand(3)
         train = np.loadtxt(file_name, delimiter=delimiter, skiprows=skiprows)
         self.train_x = train[:, 0]
         self.train_y = train[:, 1]
         self.mu = np.mean(self.train_x)
         self.sigma = np.std(self.train_x)
+        self._theta = np.zeros(3)
+        self._theta[0] = np.min(self.train_y)
 
     def standardize(self, x):
         return (x - self.mu) / self.sigma
