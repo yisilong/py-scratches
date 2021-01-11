@@ -65,8 +65,8 @@ class MLRegression(object):
             curr_error = self.E(train_z, self.train_y)
             diff = error - curr_error
             error = curr_error
-            count += 1
             print(f'第{count}次， theta0:{self._theta0:.3f}, theta1:{self._theta1:.3f}, 差值:{diff:.4f}')
+            count += 1
             yield object()
 
     def draw_animation(self):
