@@ -19,7 +19,7 @@ class MLRegression(object):
         self.train_y = train[:, 1]
         self.mu = np.mean(self.train_x)
         self.sigma = np.std(self.train_x)
-        self._theta0 = np.min(self.train_y)
+        self._theta0 = np.min(self.train_y) - 50
         self._theta1 = 0
 
     def standardize(self, x):
@@ -33,9 +33,9 @@ class MLRegression(object):
     def E(self, x, y):
         return (1.0 / 2) * np.sum((y - self.f(x)) ** 2)
 
-    def draw(self):
+    def draw(self, figure, ax):
         train_z = self.standardize(self.train_x)
-        plt.plot(train_z, self.train_y, 'o')
+        ax.plot(train_z, self.train_y, 'o')
 
         diff, count = 1, 1
         error = self.E(train_z, self.train_y)
@@ -51,9 +51,7 @@ class MLRegression(object):
 
         xs = np.linspace(-3, 3, 100)
         ys = self.f(xs)
-        plt.plot(xs, ys)
-
-        plt.show()
+        ax.plot(xs, ys)
 
     def step(self, train_z):
         diff, count = 1, 1
@@ -69,9 +67,7 @@ class MLRegression(object):
             count += 1
             yield object()
 
-    def draw_animation(self):
-        fig, ax = plt.subplots()
-
+    def draw_animation(self, figure, ax):
         train_z = self.standardize(self.train_x)
         ax.plot(train_z, self.train_y, 'o')
 
@@ -88,16 +84,20 @@ class MLRegression(object):
             line.set_ydata(ys)
             return line,
 
-        ani = animation.FuncAnimation(fig=fig,
+        ani = animation.FuncAnimation(fig=figure,
                                       func=animate,
                                       frames=self.step(train_z),
                                       init_func=init,
-                                      interval=20,
+                                      interval=5,
                                       blit=False,
                                       repeat=False)
-        plt.show()
+        return ani
 
 
 if __name__ == '__main__':
-    ml = MLRegression('click.csv')
-    ml.draw_animation()
+    fig, (ax1, ax2) = plt.subplots(1, 2, sharey='all', sharex='all', figsize=(15, 7))
+    ml1 = MLRegression('click.csv')
+    ml1.draw(fig, ax1)
+    ml2 = MLRegression('click.csv')
+    _ = ml2.draw_animation(fig, ax2)
+    plt.show()
