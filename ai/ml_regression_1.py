@@ -37,17 +37,8 @@ class MLRegression(object):
         train_z = self.standardize(self.train_x)
         ax.plot(train_z, self.train_y, 'o')
 
-        diff, count = 1, 1
-        error = self.E(train_z, self.train_y)
-        while diff > 0.01:
-            new_theta0 = self._theta0 - self.eta * np.sum(self.f(train_z) - self.train_y)
-            new_theta1 = self._theta1 - self.eta * np.sum((self.f(train_z) - self.train_y) * train_z)
-            self._theta0, self._theta1 = new_theta0, new_theta1
-            curr_error = self.E(train_z, self.train_y)
-            diff = error - curr_error
-            error = curr_error
-            count += 1
-            print(f'第{count}次， theta0:{self._theta0:.3f}, theta1:{self._theta1:.3f}, 差值:{diff:.4f}')
+        for _ in self.step(train_z):
+            pass
 
         xs = np.linspace(-3, 3, 100)
         ys = self.f(xs)
@@ -62,8 +53,8 @@ class MLRegression(object):
             self._theta0, self._theta1 = new_theta0, new_theta1
             curr_error = self.E(train_z, self.train_y)
             diff = error - curr_error
-            error = curr_error
             print(f'第{count}次， theta0:{self._theta0:.3f}, theta1:{self._theta1:.3f}, 差值:{diff:.4f}')
+            error = curr_error
             count += 1
             yield object()
 

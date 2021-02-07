@@ -39,20 +39,9 @@ class MLRegression(object):
     def draw(self, figure, ax):
         train_z = self.standardize(self.train_x)
         ax.plot(train_z, self.train_y, 'o')
-        X = self.to_matrix(train_z)
 
-        diff, count = 1, 1
-        errors = [self.MSE(X, self.train_y)]
-        while diff > 0.01:
-            # 为了调整训练数据的顺序，准备随机的序列
-            p = np.random.permutation(X.shape[0])
-            # 随机取出训练数据，使用随机梯度下降法更新参数
-            for x, y in zip(X[p, :], self.train_y[p]):
-                self._theta = self._theta - self.eta * (self.f(x) - y) * x
-            errors.append(self.MSE(X, self.train_y))
-            diff = errors[-2] - errors[-1]
-            print(f'第{count}次， theta:{self._theta}, 差值:{diff:.4f}')
-            count += 1
+        for _ in self.step(train_z):
+            pass
 
         xs = np.linspace(-3, 3, 100)
         ys = self.f(self.to_matrix(xs))

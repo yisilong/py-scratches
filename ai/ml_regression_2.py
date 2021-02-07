@@ -39,17 +39,9 @@ class MLRegression(object):
     def draw(self, figure, ax):
         train_z = self.standardize(self.train_x)
         ax.plot(train_z, self.train_y, 'o')
-        X = self.to_matrix(train_z)
 
-        diff, count = 1, 1
-        error = self.E(X, self.train_y)
-        while diff > 0.01:
-            self._theta = self._theta - self.eta * np.dot(self.f(X) - self.train_y, X)
-            curr_error = self.E(X, self.train_y)
-            diff = error - curr_error
-            error = curr_error
-            print(f'第{count}次， theta:{self._theta}, 差值:{diff:.4f}')
-            count += 1
+        for _ in self.step(train_z):
+            pass
 
         xs = np.linspace(-3, 3, 100)
         ys = self.f(self.to_matrix(xs))
