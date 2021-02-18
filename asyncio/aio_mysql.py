@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import datetime
 import asyncio
 import aiomysql
 import functools
@@ -63,4 +62,3 @@ if __name__ == '__main__':
     res = my.run_operation("INSERT INTO user_info(uid, open_id) VALUES(%s, %s) "
                            "ON DUPLICATE KEY UPDATE open_id=values(open_id); ", (9527, 'jiwekjlnik'))
     print("------insert into table-----", type(res), res)
-    loop.run_forever()
