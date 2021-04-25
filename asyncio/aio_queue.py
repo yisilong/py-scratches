@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-import aiohttp
 import asyncio
-import async_timeout
 from urllib.parse import urljoin, urldefrag
+
+import aiohttp
+import async_timeout
 
 root_url = "http://python.org/"
 crawled_urls, url_hub = [], [root_url, f"{root_url}/sitemap.xml", f"{root_url}/robots.txt"]
