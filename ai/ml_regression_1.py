@@ -21,6 +21,8 @@ class MLRegression(object):
         self.sigma = np.std(self.train_x)
         self._theta0 = np.min(self.train_y) - 50
         self._theta1 = 0
+        self._error_diff = 1
+        self._iteration_count = 1
 
     def standardize(self, x):
         return (x - self.mu) / self.sigma
@@ -45,17 +47,17 @@ class MLRegression(object):
         ax.plot(xs, ys)
 
     def step(self, train_z):
-        diff, count = 1, 1
+        self._error_diff, self._iteration_count = 1, 1
         error = self.E(train_z, self.train_y)
-        while diff > 0.01:
+        while self._error_diff > 0.01:
             new_theta0 = self._theta0 - self.eta * np.sum(self.f(train_z) - self.train_y)
             new_theta1 = self._theta1 - self.eta * np.sum((self.f(train_z) - self.train_y) * train_z)
             self._theta0, self._theta1 = new_theta0, new_theta1
             curr_error = self.E(train_z, self.train_y)
-            diff = error - curr_error
-            print(f'第{count}次， theta0:{self._theta0:.3f}, theta1:{self._theta1:.3f}, 差值:{diff:.4f}')
+            self._error_diff = error - curr_error
+            # print(f'第{self._iteration_count}次, theta0:{self._theta0:.3f}, theta1:{self._theta1:.3f}, 差值:{self._error_diff:.4f}')
             error = curr_error
-            count += 1
+            self._iteration_count += 1
             yield object()
 
     def draw_animation(self, figure, ax):
@@ -69,6 +71,8 @@ class MLRegression(object):
         def animate(i):
             ys = self.f(xs)
             line.set_ydata(ys)
+            text = f'count:{self._iteration_count}, theta0:{self._theta0:.3f}, theta1:{self._theta1:.3f}, diff:{self._error_diff:.4f}'
+            ax.set_xlabel(text)
             return line,
 
         def init():

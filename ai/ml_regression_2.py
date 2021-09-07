@@ -21,6 +21,8 @@ class MLRegression(object):
         self.eta = eta
         self._theta = np.zeros(3)
         self._theta[0] = np.min(self.train_y) - 50
+        self._error_diff = 1
+        self._iteration_count = 1
 
     def standardize(self, x):
         return (x - self.mu) / self.sigma
@@ -50,15 +52,15 @@ class MLRegression(object):
     def step(self, train_z):
         X = self.to_matrix(train_z)
 
-        diff, count = 1, 1
+        self._error_diff, self._iteration_count = 1, 1
         error = self.E(X, self.train_y)
-        while diff > 0.01:
+        while self._error_diff > 0.01:
             self._theta = self._theta - self.eta * np.dot(self.f(X) - self.train_y, X)
             curr_error = self.E(X, self.train_y)
-            diff = error - curr_error
+            self._error_diff = error - curr_error
             error = curr_error
-            print(f'第{count}次， theta:{self._theta}, 差值:{diff:.4f}')
-            count += 1
+            # print(f'第{self._iteration_count}次, theta:{self._theta}, 差值:{self._error_diff:.4f}')
+            self._iteration_count += 1
             yield object()
 
     def draw_animation(self, figure, ax):
@@ -72,6 +74,8 @@ class MLRegression(object):
         def animate(i):
             ys = self.f(self.to_matrix(xs))
             line.set_ydata(ys)
+            text = f'count:{self._iteration_count}, theta:{self._theta}, diff:{self._error_diff:.4f}'
+            ax.set_xlabel(text)
             return line,
 
         def init():
