@@ -19,8 +19,7 @@ class MLRegression(object):
         self.train_y = train[:, 1]
         self.mu = np.mean(self.train_x)
         self.sigma = np.std(self.train_x)
-        self._theta0 = np.min(self.train_y) - 50
-        self._theta1 = 0
+        self._theta = [np.min(self.train_y) - 50, 0]
         self._error_diff = 1
         self._iteration_count = 1
 
@@ -29,7 +28,7 @@ class MLRegression(object):
 
     # 预测函数
     def f(self, x):
-        return self._theta0 + self._theta1 * x
+        return self._theta[0] + self._theta[1] * x
 
     # 目标函数
     def E(self, x, y):
@@ -50,12 +49,12 @@ class MLRegression(object):
         self._error_diff, self._iteration_count = 1, 1
         error = self.E(train_z, self.train_y)
         while self._error_diff > 0.01:
-            new_theta0 = self._theta0 - self.eta * np.sum(self.f(train_z) - self.train_y)
-            new_theta1 = self._theta1 - self.eta * np.sum((self.f(train_z) - self.train_y) * train_z)
-            self._theta0, self._theta1 = new_theta0, new_theta1
+            new_theta0 = self._theta[0] - self.eta * np.sum(self.f(train_z) - self.train_y)
+            new_theta1 = self._theta[1] - self.eta * np.sum((self.f(train_z) - self.train_y) * train_z)
+            self._theta[0], self._theta[1] = new_theta0, new_theta1
             curr_error = self.E(train_z, self.train_y)
             self._error_diff = error - curr_error
-            # print(f'第{self._iteration_count}次, theta0:{self._theta0:.3f}, theta1:{self._theta1:.3f}, 差值:{self._error_diff:.4f}')
+            # print(f'第{self._iteration_count}次, theta:{self._theta}, 差值:{self._error_diff:.4f}')
             error = curr_error
             self._iteration_count += 1
             yield object()
@@ -71,7 +70,7 @@ class MLRegression(object):
         def animate(i):
             ys = self.f(xs)
             line.set_ydata(ys)
-            text = f'count:{self._iteration_count}, theta0:{self._theta0:.3f}, theta1:{self._theta1:.3f}, diff:{self._error_diff:.4f}'
+            text = f'count:{self._iteration_count}, theta:{self._theta}, diff:{self._error_diff:.4f}'
             ax.set_xlabel(text)
             return line,
 
