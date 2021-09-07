@@ -21,6 +21,8 @@ class MLRegression(object):
         self.eta = eta
         self._theta = np.zeros(3)
         self._theta[0] = np.min(self.train_y) - 50
+        self._error_diff = 1
+        self._iteration_count = 1
 
     def standardize(self, x):
         return (x - self.mu) / self.sigma
@@ -50,18 +52,18 @@ class MLRegression(object):
     def step(self, train_z):
         X = self.to_matrix(train_z)
 
-        diff, count = 1, 1
+        self._error_diff, self._iteration_count = 1, 1
         errors = [self.MSE(X, self.train_y)]
-        while diff > 0.01:
+        while self._error_diff > 0.01:
             # 为了调整训练数据的顺序，准备随机的序列
             p = np.random.permutation(X.shape[0])
             # 随机取出训练数据，使用随机梯度下降法更新参数
             for x, y in zip(X[p, :], self.train_y[p]):
                 self._theta = self._theta - self.eta * (self.f(x) - y) * x
             errors.append(self.MSE(X, self.train_y))
-            diff = errors[-2] - errors[-1]
-            print(f'第{count}次， theta:{self._theta}, 差值:{diff:.4f}')
-            count += 1
+            self._error_diff = errors[-2] - errors[-1]
+            # print(f'第{self._iteration_count}次, theta:{self._theta}, 差值:{self._error_diff:.4f}')
+            self._iteration_count += 1
             yield object()
 
     def draw_animation(self, figure, ax):
@@ -75,6 +77,8 @@ class MLRegression(object):
         def animate(i):
             ys = self.f(self.to_matrix(xs))
             line.set_ydata(ys)
+            text = f'count:{self._iteration_count}, theta:{self._theta}, error:{self._error_diff:.4f}'
+            ax.set_xlabel(text)
             return line,
 
         def init():
