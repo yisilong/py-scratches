@@ -22,6 +22,7 @@ class LinearRegression(object):
         self.mu = np.mean(self.train_x)
         self.sigma = np.std(self.train_x)
         self.eta = eta
+        self.degree = degree
         self._theta = np.zeros(degree + 1)
         self._theta[0] = np.min(self.train_y) - 50
         self._error_diff = 1
@@ -68,7 +69,8 @@ class LinearRegression(object):
         xs = np.linspace(-3, 3, 100)
         ys = self.f(self.to_matrix(xs))
         ax.plot(xs, ys)
-        text = f'eta:{self.eta}, degree:{len(self._theta)}, loss_func:{self._loss_func.__name__}, optimizer:{self._optimizer.__name__}'
+        text = f'eta:{self.eta}, degree:{self.degree}'
+        text += f'loss_func:{self._loss_func.__name__}, optimizer:{self._optimizer.__name__}'
         ax.set_xlabel(text)
 
     def step(self, train_z):
@@ -117,9 +119,9 @@ class LinearRegression(object):
 
 if __name__ == '__main__':
     train = np.loadtxt('click.csv', delimiter=',', skiprows=1)
-    fig, (ax1, ax2) = plt.subplots(1, 2, sharey='all', sharex='all', figsize=(15, 7))
-    ml1 = LinearRegression(train, degree=2)
-    ml1.draw(fig, ax1)
-    ml2 = LinearRegression(train, degree=2)
-    _ = ml2.draw_animation(fig, ax2)
+    fig, ((ax00, ax01), (ax11, ax12)) = plt.subplots(2, 2, sharey='all', sharex='all', figsize=(13, 8))
+    LinearRegression(train, degree=1).draw(fig, ax00)
+    ani1 = LinearRegression(train, degree=1).draw_animation(fig, ax01)
+    LinearRegression(train, degree=2).draw(fig, ax11)
+    ani2 = LinearRegression(train, degree=2).draw_animation(fig, ax12)
     plt.show()

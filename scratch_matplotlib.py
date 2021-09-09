@@ -106,11 +106,11 @@ def test_subplot():
     plt.subplot(2, 3, (1, 2))
     plt.plot([0, 1], [0, 1])
     plt.subplot(2, 3, 4)
-    plt.plot([0, 1], [0, 1])
+    plt.plot([0, 1], [0, 1], color='red')
     plt.subplot(2, 3, 5)
-    plt.plot([0, 1], [0, 1])
+    plt.plot([0, 1], [0, 1], color='blue')
     plt.subplot(1, 3, 3)
-    plt.plot([0, 1], [0, 1])
+    plt.plot([0, 1], [0, 1], color='green')
     plt.show()
 
 
@@ -118,15 +118,18 @@ def test_subplot():
 def test_subplot2grid():
     plt.figure()
     ax1 = plt.subplot2grid((3, 3), (0, 0), colspan=3)
-    ax1.plot([1, 2], [1, 2])  # 画小图
-    ax1.set_title('ax1_title')  # 设置小图的标题
+    ax1.plot([1, 2], [1, 2])
+    ax1.set_title('ax1_title')
     ax2 = plt.subplot2grid((3, 3), (1, 0), colspan=2)
+    ax2.plot([1, 2], [1, 2], color='red')
     ax3 = plt.subplot2grid((3, 3), (1, 2), rowspan=2)
+    ax3.plot([1, 2], [1, 2], color='green')
     ax4 = plt.subplot2grid((3, 3), (2, 0))
-    ax4.scatter([1, 2], [2, 2])
+    ax4.scatter([1, 2], [2, 2], color='blue')
     ax4.set_xlabel('ax4_x')
     ax4.set_ylabel('ax4_y')
     ax5 = plt.subplot2grid((3, 3), (2, 1))
+    ax5.plot([1, 2], [1, 2], color='yellow')
     plt.show()
 
 
@@ -136,10 +139,15 @@ def test_gridspec():
     plt.figure()
     gs = gridspec.GridSpec(3, 3)
     ax6 = plt.subplot(gs[0, :])
+    ax6.plot([1, 2], [1, 2])
     ax7 = plt.subplot(gs[1, :2])
+    ax7.plot([1, 2], [1, 2], color='red')
     ax8 = plt.subplot(gs[1:, 2])
+    ax8.plot([1, 2], [1, 2], color='green')
     ax9 = plt.subplot(gs[-1, 0])
+    ax9.plot([1, 2], [2, 2], color='blue')
     ax10 = plt.subplot(gs[-1, -2])
+    ax10.plot([1, 2], [1, 2], color='yellow')
     plt.show()
 
 
@@ -147,7 +155,10 @@ def test_gridspec():
 def test_subplots():
     plt.figure()
     f, ((ax11, ax12), (ax13, ax14)) = plt.subplots(2, 2, sharex='all', sharey='all')
-    ax11.scatter([1, 2], [1, 2])
+    ax11.plot([1, 2], [1, 2])
+    ax12.plot([1, 2], [1, 2], color='red')
+    ax13.plot([1, 2], [1, 2], color='green')
+    ax14.plot([1, 2], [1, 2], color='blue')
     plt.tight_layout()
     plt.show()
 
@@ -161,20 +172,20 @@ def test_plot_in_plot():
 
     left, bottom, width, height = 0.1, 0.1, 0.8, 0.8
     ax1 = fig.add_axes([left, bottom, width, height])
-    ax1.plot(x, y, 'r')
+    ax1.plot(x, y, color='red')
     ax1.set_xlabel('x')
     ax1.set_ylabel('y')
     ax1.set_title('title')
 
     left, bottom, width, height = 0.2, 0.6, 0.25, 0.25
     ax2 = fig.add_axes([left, bottom, width, height])
-    ax2.plot(y, x, 'b')
+    ax2.plot(y, x, color='blue')
     ax2.set_xlabel('x')
     ax2.set_ylabel('y')
     ax2.set_title('title inside b')
 
     plt.axes([0.6, 0.2, 0.25, 0.25])
-    plt.plot(y[::-1], x, 'g')
+    plt.plot(y[::-1], x, color='green')
     plt.xlabel('x')
     plt.ylabel('y')
     plt.title('title inside g')
@@ -223,7 +234,7 @@ def test_animation():
 
 
 if __name__ == '__main__':
-    # draw_scatter()
+    draw_scatter()
     # draw_bar()
     # draw_contours()
     # draw_image()
@@ -235,4 +246,4 @@ if __name__ == '__main__':
     # test_subplots()
     # test_plot_in_plot()
     # test_twinx()
-    test_animation()
+    # test_animation()
