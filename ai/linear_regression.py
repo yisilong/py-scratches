@@ -69,7 +69,7 @@ class LinearRegression(object):
         xs = np.linspace(-3, 3, 100)
         ys = self.f(self.to_matrix(xs))
         ax.plot(xs, ys)
-        text = f'eta:{self.eta}, degree:{self.degree}'
+        text = f'eta:{self.eta}, degree:{self.degree}, '
         text += f'loss_func:{self._loss_func.__name__}, optimizer:{self._optimizer.__name__}'
         ax.set_xlabel(text)
 
