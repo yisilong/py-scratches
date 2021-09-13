@@ -20,7 +20,6 @@ class LinearRegression(object):
         self.eta = eta
         self.degree = degree
         self._theta = np.zeros(degree + 1)
-        # self._theta[0] = np.min(self.train_y) - 50
         self._error_diff = 1
         self._iteration_count = 1
 
@@ -65,7 +64,6 @@ class LinearRegression(object):
             self._theta -= self.eta * np.dot((self._predict(x) - y), x)
 
     def fit(self, X, y):
-        self._theta[0] = np.min(y) - 50
         X = self.standardize(X)
         X = self.to_matrix(X)
 
@@ -93,21 +91,10 @@ class LinearRegression(object):
         indexes = np.argsort(X)
         ax.plot(X[indexes], y_predict[indexes], color='red')
 
-        text = f'eta:{self.eta}, degree:{self.degree}, '
-        text += f'loss_func:{self._loss_func.__name__}, optimizer:{self._optimizer.__name__}'
+        loss_func_name = self._loss_func.__name__
+        optimizer_func_name = self._optimizer.__name__
+        text = f'eta:{self.eta}, degree:{self.degree}, loss:{loss_func_name}, optimizer:{optimizer_func_name}'
         ax.set_xlabel(text)
-
-    def draw(self, X, y, figure, ax):
-        ax.scatter(X, y)
-
-        y_predict = self.fit(X, y).predict(X)
-        indexes = np.argsort(X)
-        ax.plot(X[indexes], y_predict[indexes], color='red')
-
-        text = f'eta:{self.eta}, degree:{self.degree}, '
-        text += f'loss_func:{self._loss_func.__name__}, optimizer:{self._optimizer.__name__}'
-        ax.set_xlabel(text)
-
 
     def draw_animation(self, X, y, figure, ax):
         ax.scatter(X, y)
@@ -116,7 +103,6 @@ class LinearRegression(object):
         y_predict = np.zeros(X.shape[0])
         line, = ax.plot(X[indexes], y_predict[indexes], color='red')
 
-        self._theta[0] = np.min(y) - 50
         X1 = self.standardize(X)
         X1 = self.to_matrix(X1)
 
@@ -128,11 +114,11 @@ class LinearRegression(object):
             return line,
 
         ani = animation.FuncAnimation(fig=figure,
-                                        func=animate,
-                                        frames=self.step(X1, y),
-                                        interval=1,
-                                        blit=False,
-                                        repeat=False)
+                                      func=animate,
+                                      frames=self.step(X1, y),
+                                      interval=1,
+                                      blit=False,
+                                      repeat=False)
         return ani
 
 
