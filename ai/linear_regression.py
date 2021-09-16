@@ -12,16 +12,19 @@ class LinearRegression(object):
     f(theta) = theta0 + theta1 * x + theta2 * x^2 + ... + thetaN * x^N
     """
 
-    def __init__(self, eta=0.001, degree=2, loss_func='MSE', optimizer='SGD'):
+    def __init__(self, eta=0.001, degree=2, loss_func='MSE', optimizer='SGD', regularizer='L2'):
         assert loss_func in ['MSE', 'E'], 'loss_func must be MSE or E'
         assert optimizer in ['BGD', 'SGD'], 'optimizer must be BGD or SGD'
+        assert regularizer in ['L1', 'L2'], 'regularizer must be L1 or L2'
         self._loss_func = getattr(self, loss_func)
         self._optimizer = getattr(self, optimizer)
+        self._regularizer = getattr(self, regularizer)
         self.eta = eta
         self.degree = degree
         self._theta = np.zeros(degree + 1)
         self._error_diff = 1
         self._iteration_count = 1
+        self._lambda = 0.01
 
     # 标准化(归一化)
     def standardize(self, x):
@@ -51,9 +54,21 @@ class LinearRegression(object):
     def MSE(self, x, y):
         return (1.0 / x.shape[0]) * np.sum((y - self._predict(x)) ** 2)
 
+    # L1正则化
+    def L1(self):
+        l1 = self._lambda * np.array(list(map(lambda _: 1 if _ > 0 else -1, self._theta)))
+        l1[0] = 0
+        return l1
+
+    # L2正则化
+    def L2(self):
+        l2 = self._lambda * self._theta
+        l2[0] = 0
+        return l2
+
     # 梯度下降法
     def BGD(self, X, train_y):
-        self._theta -= self.eta * np.dot(self._predict(X) - train_y, X)
+        self._theta -= self.eta * (np.dot(self._predict(X) - train_y, X) + self._regularizer())
 
     # 随机梯度下降法
     def SGD(self, X, train_y):
@@ -61,7 +76,7 @@ class LinearRegression(object):
         p = np.random.permutation(X.shape[0])
         # 随机取出训练数据，使用随机梯度下降法更新参数
         for x, y in zip(X[p, :], train_y[p]):
-            self._theta -= self.eta * np.dot((self._predict(x) - y), x)
+            self._theta -= self.eta * (np.dot((self._predict(x) - y), x) + self._regularizer())
 
     def fit(self, X, y):
         X = self.standardize(X)
