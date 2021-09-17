@@ -60,8 +60,7 @@ class Perceptron(object):
 
         indexes = np.argsort(X, axis=0)[:, 0]
         x0 = X[indexes, 0]
-        x1 = -self._theta[0] * x0 / self._theta[1]
-        line, = ax.plot(x0, x1)
+        line, = ax.plot(x0, np.zeros(x0.shape[0]))
 
         def animate(i):
             y1 = -self._theta[0] * x0 / self._theta[1]
