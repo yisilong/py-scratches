@@ -6,9 +6,9 @@ from sklearn.preprocessing import PolynomialFeatures
 
 
 # 标准化(归一化)
-def standardize(x):
-    mu = np.mean(x)
-    sigma = np.std(x)
+def standardize(x, axis=None):
+    mu = np.mean(x, axis=axis)
+    sigma = np.std(x, axis=axis)
     return (x - mu) / sigma
 
 

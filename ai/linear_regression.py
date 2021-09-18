@@ -22,13 +22,17 @@ class LinearRegression(object):
         self.optimizer_func = getattr(self, optimizer)
         self.regularization_func = getattr(self, regularization)
         self.eta = eta
-        self._error_diff = 1
-        self._iteration_count = 1
+        self._error = np.NAN
+        self.iteration_count = 1
         self._lambda = 0.01
 
     @property
     def theta(self):
         return self._theta
+
+    @property
+    def error(self):
+        return self._error
 
     # 拟合函数
     def f(self, x):
@@ -68,29 +72,27 @@ class LinearRegression(object):
 
     # 训练
     def fit(self, X, y):
-        X = util.standardize(X)
-
+        X = util.standardize(X, axis=0)
         for _ in self.step(X, y):
             pass
-
         return self
 
     # 预测
     def predict(self, x):
-        x = util.standardize(x)
+        x = util.standardize(x, axis=0)
         return self.f(x)
 
     def step(self, X, y):
         self._theta = np.random.random(X.shape[-1])
-        self._error_diff, self._iteration_count = 1, 1
-        error = self.loss_func(X, y)
-        while self._error_diff > 0.01:
+        error_diff = 1
+        self._error = self.loss_func(X, y)
+        while error_diff > 0.01:
             self.optimizer_func(X, y)
             curr_error = self.loss_func(X, y)
-            self._error_diff = error - curr_error
-            # print(f'第{self._iteration_count}次, theta:{self._theta}, 差值:{self._error_diff:.4f}')
-            error = curr_error
-            self._iteration_count += 1
+            error_diff = abs(self._error - curr_error)
+            self.iteration_count += 1
+            self._error = curr_error
+            # print(f'count:{self.iteration_count}, theta:{self._theta}, loss:{self._error:.4f}')
             yield object()
 
 
@@ -116,19 +118,19 @@ def draw_animation(model, X, y, figure, ax, degree=1):
     y_predict = np.zeros(X.shape[0])
     line, = ax.plot(X[indexes], y_predict[indexes], color='red')
 
-    X1 = util.standardize(X)
-    X1 = util.to_matrix(X1, degree)
+    X = util.to_matrix(X, degree)
+    X = util.standardize(X, axis=0)
 
     def animate(i):
-        y_predict = model.f(X1)
+        y_predict = model.f(X)
         line.set_ydata(y_predict[indexes])
-        text = f'count:{model._iteration_count}, theta:{model.theta}, loss:{model._error_diff:.4f}'
+        text = f'count:{model.iteration_count}, theta:{model.theta}, loss:{model.error:.4f}'
         ax.set_xlabel(text)
         return line,
 
     ani = animation.FuncAnimation(fig=figure,
                                   func=animate,
-                                  frames=model.step(X1, y),
+                                  frames=model.step(X, y),
                                   interval=1,
                                   blit=False,
                                   repeat=False)
