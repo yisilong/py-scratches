@@ -20,6 +20,10 @@ class Perceptron(object):
     def theta(self):
         return self._theta
 
+    @property
+    def iteration_count(self):
+        return self._iteration_count
+
     # 预测函数
     def predict(self, x):
         return np.dot(x, self._theta)
