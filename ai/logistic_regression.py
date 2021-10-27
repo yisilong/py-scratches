@@ -13,7 +13,7 @@ class LogisticRegression(object):
     theta0 + theta1 * x + theta2 * x^2 + ... + thetaN * x^N + theta * z = 0
     """
 
-    def __init__(self, eta=0.001, loss_func='MSE', optimizer='SGD', regularization='L2'):
+    def __init__(self, eta=0.005, loss_func='MSE', optimizer='SGD', regularization='L2'):
         assert loss_func in ['MSE', 'E'], 'loss_func must be MSE or E'
         assert optimizer in ['BGD', 'SGD'], 'optimizer must be BGD or SGD'
         assert regularization in ['L1', 'L2'], 'regularization must be L1 or L2'
@@ -22,7 +22,7 @@ class LogisticRegression(object):
         self.regularization_func = getattr(self, regularization)
         self.eta = eta
         self.iteration_count = 0
-        self._lambda = 0.001
+        self._lambda = 0.01
         self.accuracy = 0
 
     @property
@@ -78,7 +78,7 @@ class LogisticRegression(object):
 
     # 预测
     def predict(self, x):
-        x = util.standardize(x, axis=0)
+        x = util.standardize(x)
         return self.classify(x)
 
     def classify(self, x):
@@ -86,37 +86,32 @@ class LogisticRegression(object):
 
     def step(self, X, y):
         self._theta = np.random.rand(X.shape[-1])
-        futile_times = 0
-        while self.accuracy < 0.99 and futile_times < 500:
+        while self.accuracy < 0.995:
             self.optimizer_func(X, y)
-            curr_accuracy = len(X[self.classify(X) == y]) / len(X)
-            accuracy_diff = abs(self.accuracy - curr_accuracy)
-            if accuracy_diff != 0:
-                futile_times = 0
-            futile_times += 1
+            self.accuracy = len(X[self.classify(X) == y]) / len(X)
             self.iteration_count += 1
-            # print(f'count:{self.iteration_count}, theta:{self._theta}, accuracy:{self.accuracy}, {curr_accuracy}, {futile_times}')
-            self.accuracy = curr_accuracy
+            # print(f'count:{self.iteration_count}, theta:{self._theta}, accuracy:{self.accuracy}')
             yield object()
 
 
 def draw(model, X, y, figure, ax, degree=1):
-    X = util.standardize(X, axis=0)
-
     i_o, i_x = y == 1, y == 0
     ax.plot(X[i_o, 0], X[i_o, 1], 'o')
     ax.plot(X[i_x, 0], X[i_x, 1], 'x')
 
-    indexes = np.argsort(X, axis=0)[:, 0]
-    x = X[indexes, 0]
+    indexes = np.argsort(X[:, 0], axis=0)
 
-    X1 = X
-    Z = X1[:, -1:]
-    X1 = util.to_matrix(X1[:, :-1], degree)
+    Z = X[:, -1:]
+    z_offset = np.average(Z, axis=0)
+    Z = Z - z_offset
+
+    X1 = util.standardize(X[:, :-1])
+    X1 = util.to_matrix(X1, degree)
+
     model.fit(np.hstack((X1, Z)), y)
 
     z = -np.dot(X1, model.theta[:-1]) / model.theta[-1]
-    ax.plot(x, z[indexes])
+    ax.plot(X[indexes, 0], z[indexes] + z_offset)
 
     optimizer_func_name = model.optimizer_func.__name__
     text = f'eta:{model.eta}, degree:{degree}, optimizer:{optimizer_func_name}'
@@ -124,21 +119,23 @@ def draw(model, X, y, figure, ax, degree=1):
 
 
 def draw_animation(model, X, y, figure, ax, degree=1):
-    X = util.standardize(X, axis=0)
-
     i_o, i_x = y == 1, y == 0
     ax.plot(X[i_o, 0], X[i_o, 1], 'o')
     ax.plot(X[i_x, 0], X[i_x, 1], 'x')
 
-    indexes = np.argsort(X, axis=0)[:, 0]
-    line, = ax.plot(X[indexes, 0], np.zeros(X.shape[0]))
+    indexes = np.argsort(X[:, 0], axis=0)
 
     Z = X[:, -1:]
-    X1 = util.to_matrix(X[:, :-1], degree)
+    line, = ax.plot(X[indexes, 0], np.full(X.shape[0], np.min(Z)))
+    z_offset = np.average(Z, axis=0)
+    Z -= z_offset
+
+    X1 = util.standardize(X[:, :-1])
+    X1 = util.to_matrix(X1, degree)
 
     def animate(i):
         z = -np.dot(X1, model.theta[:-1]) / model.theta[-1]
-        line.set_ydata(z[indexes])
+        line.set_ydata(z[indexes] + z_offset)
         text = f'count:{model.iteration_count}, theta:{model.theta}, accuracy:{model.accuracy}'
         ax.set_xlabel(text)
         return line,
@@ -153,7 +150,7 @@ def draw_animation(model, X, y, figure, ax, degree=1):
 
 
 if __name__ == '__main__':
-    fig, ((ax00, ax01), (ax10, ax11)) = plt.subplots(2, 2, sharey='all', sharex='all', figsize=(13, 8))
+    fig, ((ax00, ax01), (ax10, ax11)) = plt.subplots(2, 2, sharey='row', sharex='row', figsize=(13, 8))
 
     train = np.loadtxt('images2.csv', delimiter=',', skiprows=1)
     x, y = train[:, 0:2], train[:, 2]

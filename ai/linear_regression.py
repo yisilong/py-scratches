@@ -14,7 +14,7 @@ class LinearRegression(object):
     f(theta) = theta0 + theta1 * x + theta2 * x^2 + ... + thetaN * x^N
     """
 
-    def __init__(self, eta=0.001, loss_func='MSE', optimizer='SGD', regularization='L2'):
+    def __init__(self, eta=0.005, loss_func='MSE', optimizer='SGD', regularization='L2'):
         assert loss_func in ['MSE', 'E'], 'loss_func must be MSE or E'
         assert optimizer in ['BGD', 'SGD'], 'optimizer must be BGD or SGD'
         assert regularization in ['L1', 'L2'], 'regularization must be L1 or L2'
@@ -22,17 +22,13 @@ class LinearRegression(object):
         self.optimizer_func = getattr(self, optimizer)
         self.regularization_func = getattr(self, regularization)
         self.eta = eta
-        self._error = np.NAN
+        self.error = np.NAN
         self.iteration_count = 1
         self._lambda = 0.01
 
     @property
     def theta(self):
         return self._theta
-
-    @property
-    def error(self):
-        return self._error
 
     # 拟合函数
     def f(self, x):
@@ -72,37 +68,39 @@ class LinearRegression(object):
 
     # 训练
     def fit(self, X, y):
-        X = util.standardize(X, axis=0)
+        X = util.standardize(X)
+
         for _ in self.step(X, y):
             pass
+
         return self
 
     # 预测
-    def predict(self, x):
-        x = util.standardize(x, axis=0)
-        return self.f(x)
+    def predict(self, X):
+        X = util.standardize(X)
+        return self.f(X)
 
     def step(self, X, y):
         self._theta = np.random.random(X.shape[-1])
-        error_diff = 1
-        self._error = self.loss_func(X, y)
-        while error_diff > 0.01:
+        error_diff, self.iteration_count = 1, 1
+        error = self.loss_func(X, y)
+        while error_diff > 0.001:
             self.optimizer_func(X, y)
-            curr_error = self.loss_func(X, y)
-            error_diff = abs(self._error - curr_error)
+            self.error = self.loss_func(X, y)
+            error_diff = abs(error - self.error)
+            # print(f'第{self._iteration_count}次, theta:{self._theta}, 差值:{error_diff:.4f}')
+            error = self.error
             self.iteration_count += 1
-            self._error = curr_error
-            # print(f'count:{self.iteration_count}, theta:{self._theta}, loss:{self._error:.4f}')
             yield object()
 
 
 def draw(model, X, y, figure, ax, degree=1):
     ax.scatter(X, y)
+    indexes = np.argsort(X[:, 0])
 
     X1 = util.to_matrix(X, degree)
     y_predict = model.fit(X1, y).predict(X1)
 
-    indexes = np.argsort(X, axis=0)[:, 0]
     ax.plot(X[indexes], y_predict[indexes], color='red')
 
     loss_func_ = model.loss_func.__name__
@@ -113,16 +111,16 @@ def draw(model, X, y, figure, ax, degree=1):
 
 def draw_animation(model, X, y, figure, ax, degree=1):
     ax.scatter(X, y)
+    indexes = np.argsort(X[:, 0])
 
-    indexes = np.argsort(X, axis=0)[:, 0]
-    y_predict = np.zeros(X.shape[0])
+    y_predict = np.full(X.shape[0], np.min(y))
     line, = ax.plot(X[indexes], y_predict[indexes], color='red')
 
-    X = util.to_matrix(X, degree)
-    X = util.standardize(X, axis=0)
+    X1 = util.to_matrix(X, degree)
+    X1 = util.standardize(X1)
 
     def animate(i):
-        y_predict = model.f(X)
+        y_predict = model.f(X1)
         line.set_ydata(y_predict[indexes])
         text = f'count:{model.iteration_count}, theta:{model.theta}, loss:{model.error:.4f}'
         ax.set_xlabel(text)
@@ -130,7 +128,7 @@ def draw_animation(model, X, y, figure, ax, degree=1):
 
     ani = animation.FuncAnimation(fig=figure,
                                   func=animate,
-                                  frames=model.step(X, y),
+                                  frames=model.step(X1, y),
                                   interval=1,
                                   blit=False,
                                   repeat=False)
