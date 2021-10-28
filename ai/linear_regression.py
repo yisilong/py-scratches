@@ -13,13 +13,11 @@ class LinearRegression(object):
     f(theta) = theta0 + theta1 * x + theta2 * x^2 + ... + thetaN * x^N
     """
 
-    def __init__(self, eta=0.005, loss_func='MSE', optimizer='SGD', regularization='L2'):
-        assert loss_func in ['MSE', 'E'], 'loss_func must be MSE or E'
+    def __init__(self, eta=0.005, loss='MSE', optimizer='SGD', regularization='L2'):
         assert optimizer in ['BGD', 'SGD'], 'optimizer must be BGD or SGD'
-        assert regularization in ['L1', 'L2'], 'regularization must be L1 or L2'
-        self.loss_func = getattr(self, loss_func)
+        self.loss_func = util.loss_func(loss)
         self.optimizer_func = getattr(self, optimizer)
-        self.regularization_func = getattr(self, regularization)
+        self.regularization_func = util.regularization_func(regularization)
         self.eta = eta
         self.error = np.NAN
         self.iteration_count = 1
@@ -33,29 +31,10 @@ class LinearRegression(object):
     def f(self, x):
         return np.dot(x, self._theta)
 
-    # 方差
-    def E(self, x, y):
-        return (1.0 / 2) * np.sum((y - self.f(x)) ** 2)
-
-    # 均方误差
-    def MSE(self, x, y):
-        return (1.0 / x.shape[0]) * np.sum((y - self.f(x)) ** 2)
-
-    # L1正则化
-    def L1(self):
-        l1 = self._lambda * np.array(list(map(lambda _: 1 if _ > 0 else -1, self._theta)))
-        l1[0] = 0
-        return l1
-
-    # L2正则化
-    def L2(self):
-        l2 = self._lambda * self._theta
-        l2[0] = 0
-        return l2
-
     # 梯度下降法
     def BGD(self, X, y):
-        self._theta -= self.eta * (np.dot(self.f(X) - y, X) + self.regularization_func())
+        v = self.regularization_func(self.theta)
+        self._theta -= self.eta * (np.dot(self.f(X) - y, X) + v)
 
     # 随机梯度下降法
     def SGD(self, X, y):
@@ -63,7 +42,7 @@ class LinearRegression(object):
         p = np.random.permutation(X.shape[0])
         # 随机取出训练数据，使用随机梯度下降法更新参数
         for x, y in zip(X[p, :], y[p]):
-            self._theta -= self.eta * (np.dot((self.f(x) - y), x) + self.regularization_func())
+            self.BGD(x, y)
 
     # 训练
     def fit(self, X, y):
@@ -82,10 +61,10 @@ class LinearRegression(object):
     def step(self, X, y):
         self._theta = np.random.random(X.shape[-1])
         error_diff, self.iteration_count = 1, 1
-        error = self.loss_func(X, y)
+        error = self.loss_func(X, y, self.f)
         while error_diff > 0.001:
             self.optimizer_func(X, y)
-            self.error = self.loss_func(X, y)
+            self.error = self.loss_func(X, y, self.f)
             error_diff = abs(error - self.error)
             # print(f'第{self._iteration_count}次, theta:{self._theta}, 差值:{error_diff:.4f}')
             error = self.error

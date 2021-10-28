@@ -14,15 +14,11 @@ class Perceptron(object):
     def __init__(self, epoch=10):
         self._theta = np.array([1, 0], dtype=float)
         self._epoch = epoch
-        self._iteration_count = 1
+        self.iteration_count = 1
 
     @property
     def theta(self):
         return self._theta
-
-    @property
-    def iteration_count(self):
-        return self._iteration_count
 
     # 预测函数
     def predict(self, x):
@@ -30,7 +26,7 @@ class Perceptron(object):
 
     # 判别函数
     def f(self, x):
-        if np.dot(x, self._theta) > 0:
+        if self.predict(x) > 0:
             return 1
         return -1
 
@@ -46,7 +42,7 @@ class Perceptron(object):
                 if self.f(x) != y_:
                     self._theta += y_ * x
                     # print(f'第{i + 1}次, theta:{self._theta}')
-                self._iteration_count += 1
+                self.iteration_count += 1
                 yield object()
 
 
