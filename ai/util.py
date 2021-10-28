@@ -79,4 +79,4 @@ def euclidean_distance(vec1, vec2):
     """
     计算欧几里得距离
     """
-    return np.sqrt(np.sum(np.square(vec1 - vec2)))
+    return np.sqrt(np.sum(np.square(vec1 - vec2), axis=-1))
