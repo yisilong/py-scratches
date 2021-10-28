@@ -33,7 +33,7 @@ class LinearRegression(object):
 
     # 梯度下降法
     def BGD(self, X, y):
-        v = self.regularization_func(self.theta)
+        v = self.regularization_func(self.eta, self.theta)
         self._theta -= self.eta * (np.dot(self.f(X) - y, X) + v)
 
     # 随机梯度下降法

@@ -37,7 +37,8 @@ class LogisticRegression(object):
 
     # 梯度下降法
     def BGD(self, X, y):
-        self._theta -= self.eta * (np.dot(self.f(X) - y, X) + self.regularization_func())
+        v = self.regularization_func(self.eta, self.theta)
+        self._theta -= self.eta * (np.dot(self.f(X) - y, X) + v)
 
     # 随机梯度下降法
     def SGD(self, X, y):
